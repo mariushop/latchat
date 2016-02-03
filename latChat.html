@@ -1,0 +1,32 @@
+<head>
+  <title>latChat</title>
+</head>
+
+<body>
+  <h1>Welcome to latChat!</h1>
+  {{> loginButtons}}
+  <div>
+      {{> messagesTemplate}}
+  </div>
+  <div>
+    {{> inputTemplate}}
+    </div>
+</body>
+
+<template name="messagesTemplate"> 
+  {{#if isTyping.isTyping}}
+    {{isTyping.isTyping}} is typing
+  {{/if}}
+  <ul>
+    {{#each message in messages}}
+      <li>{{message.from}} says {{message.message}}</li>
+    {{/each}}
+  </ul>
+</template>
+
+<template name="inputTemplate">
+  <form id="messageForm">
+    <textarea class="" id="messageInput"></textarea>
+    <button type="submit">Go!</button>
+  </form>
+</template>
