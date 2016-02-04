@@ -1,32 +1,40 @@
 <head>
-  <title>latChat</title>
+  <title>latChatZoli</title>
 </head>
 
 <body>
-  <h1>Welcome to latChat!</h1>
-  {{> loginButtons}}
-  <div>
-      {{> messagesTemplate}}
-  </div>
-  <div>
+  <div class="container">
+    <h1>Welcome to LatChat!</h1>
+
+    {{> messageListTemplate}}
     {{> inputTemplate}}
-    </div>
+  </div>
 </body>
 
-<template name="messagesTemplate"> 
-  {{#if isTyping.isTyping}}
-    {{isTyping.isTyping}} is typing
-  {{/if}}
-  <ul>
-    {{#each message in messages}}
-      <li>{{message.from}} says {{message.message}}</li>
-    {{/each}}
-  </ul>
+<template name="messageListTemplate"> 
+  <div class="row">
+    <div class="col-sm-4">
+      {{> loginButtons}}
+      
+      <ul>
+      {{#each channel in channels}}
+        <li class="channel-name">{{channel.name}}</li>
+      {{/each}}
+      </ul>
+    </div>
+    <div class="col-sm-8">
+      <ul class="list-group">
+      {{#each message in messages}}
+        <li class="list-group-item">{{message.user}} said: {{message.message}} (@{{message.time}})</li>
+      {{/each}}
+      </ul>
+    </div>
+  </div>
 </template>
 
 <template name="inputTemplate">
-  <form id="messageForm">
-    <textarea class="" id="messageInput"></textarea>
-    <button type="submit">Go!</button>
+  <form action="#" class="addMessageForm">
+    <textarea name="message" id="msg" class="form-control" cols="30" rows="10"></textarea>
+    <button type="submit" class="btn btn-success">Send Message</button>
   </form>
 </template>

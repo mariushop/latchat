@@ -1,74 +1,80 @@
+Channels = new Mongo.Collection("channels");
+Messages = new Mongo.Collection("messages");
+
 if (Meteor.isClient) {
-  //configure signup options
+  Session.set('subscribedChannelName', 'general');
+
   Accounts.ui.config({
     passwordSignupFields: 'USERNAME_AND_OPTIONAL_EMAIL'
   });
 
-  //code related to messagesTemplate
-  Template.messagesTemplate.helpers({
+  Template.messageListTemplate.helpers({
     messages: function(){
       return Messages.find().fetch();
     },
-    isTyping: function(){
-      return Channels.find({name:"general"}).fetch()[0];
+    channels: function(){
+      return Channels.find().fetch();
     }
   });
 
-  //code related to inputTemplate
-  Template.inputTemplate.events({
-    "submit #messageForm": function(event){
-      event.preventDefault();
-      var message = $("#messageInput").val();
-      if (message.trim() == "") {
-        return;
-      };
-      var newMessage = {
-        from: Meteor.user().username,
-        timestamp: Date.now(),
-        message:message
-      }
-      Messages.insert(newMessage);
-      $("#messageInput").val("")
-    },
-    "keydown #messageInput": function() {
-      var timeout;
-      var generalChannel = Channels.find({name:"general"}).fetch();
-      var generalChannelId = generalChannel[0]._id;
-      var usersTyping = generalChannel[0].isTyping;
-      var username = Meteor.user().username;
-      if (usersTyping.indexOf(username) < 0) {          
-          Channels.update({_id: generalChannelId}, {$push:{
-            isTyping: username
-          }});
-        }
-      if (timeout){
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(function(){
-        if (usersTyping.indexOf(username) > -1) {          
-          Channels.update({_id: generalChannelId}, {$pull:{
-            isTyping: username
-          }});
-        }
-      },1000);
-    } 
+  Template.messageListTemplate.events({
+    'click .channel-name': function(e){
+      console.log($(e.currentTarget).text());
+
+      Session.set('subscribedChannelName', $(e.currentTarget).text());
+      Meteor.subscribe('allMessages', $(e.currentTarget).text());
+    }
   });
+
+  Template.inputTemplate.events({
+    "submit .addMessageForm": function(e) {
+      e.preventDefault();
+
+      var channelID = Channels.findOne({name: Session.get('subscribedChannelName')})._id;
+      console.log(channelID);
+
+      var message = {
+        user: Meteor.user().username,
+        time: new Date(),
+        message: $('#msg').val(),
+        channel: channelID
+      }
+
+      Messages.insert(message);
+
+      $('#msg').val("");
+    }
+  });
+
+  Meteor.subscribe('allChannels');
+  Meteor.subscribe('allMessages', Session.get('subscribedChannelName'));
 }
 
-//define Mongo Collections
-Messages = new Mongo.Collection("messages");
-Channels = new Mongo.Collection("channels");
-
-//code that runs on server
 if (Meteor.isServer) {
-  // code to run on server at startup
   Meteor.startup(function () {
     if (Channels.find().count() == 0) {
-      var newChannel = {
+      var newChannelGeneral = {
           name: "general",
-          isTyping:[]
+          usersTyping:[]
       }
-      Channels.insert(newChannel);
+
+      var newChannelPrivate = {
+          name: "private",
+          usersTyping:[]
+      }
+
+      Channels.insert(newChannelGeneral);
+      Channels.insert(newChannelPrivate);
     };
+  });
+
+  Meteor.publish('allChannels', function(){
+    return Channels.find();
+  });
+
+  Meteor.publish('allMessages', function(subscribedChannelName){
+    var channelID = Channels.findOne({name: subscribedChannelName})._id;
+    console.log(channelID);
+    return Messages.find({channel: channelID});
   });
 }
