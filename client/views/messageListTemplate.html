@@ -1,16 +1,3 @@
-<head>
-  <title>latChatZoli</title>
-</head>
-
-<body>
-  <div class="container">
-    <h1>Welcome to LatChat!</h1>
-
-    {{> messageListTemplate}}
-    {{> inputTemplate}}
-  </div>
-</body>
-
 <template name="messageListTemplate"> 
   <div class="row">
     <div class="col-sm-4">
@@ -30,11 +17,4 @@
       </ul>
     </div>
   </div>
-</template>
-
-<template name="inputTemplate">
-  <form action="#" class="addMessageForm">
-    <textarea name="message" id="msg" class="form-control" cols="30" rows="10"></textarea>
-    <button type="submit" class="btn btn-success">Send Message</button>
-  </form>
 </template>
